@@ -1,0 +1,46 @@
+#cloud-config
+
+coreos:
+  update:
+    reboot-strategy: off
+  units:
+    - name: docker.service
+      command: start
+    - name: systemd-networkd-wait-online.service
+      enable: true
+      command: start
+    - name: nginx-rtmp.service
+      runtime: true
+      command: start
+      content: |
+        [Unit]
+        Description=NGINX RTMP Server
+        Wants=docker.service
+        After=docker.service
+
+        # Wait for network to become ready
+        Wants=systemd-networkd-wait-online.service
+        After=systemd-networkd-wait-online.service
+
+        [Service]
+        # Set COREOS_PUBLIC_IPV4
+        EnvironmentFile=/etc/environment
+
+        # Allow time for Docker to download image
+        TimeoutStartSec=0
+
+        # Restart on failure
+        RestartSec=10
+        Restart=on-failure
+
+        # Remove old containers if required
+        ExecStartPre=-/usr/bin/docker kill nginx-rtmp
+        ExecStartPre=-/usr/bin/docker rm nginx-rtmp
+
+        # Pull image first if needed
+        ExecStartPre=/usr/bin/docker pull awakening/awakening-nginx-rtmp
+
+        # Run bound to our IPv4 address, set DNS to Google Public DNS
+        ExecStart=/usr/bin/docker run --name nginx-rtmp -e PUBLISH_SECRET=${publish_secret} -e CORS_HTTP_ORIGIN=${cors_http_origin} -p 80:80 -p 1935:1935 --dns 8.8.8.8 --dns 8.8.4.4 awakening/awakening-nginx-rtmp
+
+        ExecStop=/usr/bin/docker stop nginx-rtmp
