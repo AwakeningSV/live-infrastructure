@@ -1,10 +1,21 @@
 #cloud-config
 
 coreos:
+  etcd2:
+    name: av1
+    initial-cluster: av1=http://127.0.0.1:2380
+    initial-advertise-peer-urls: http://127.0.0.1:2380
+    advertise-client-urls: http://127.0.0.1:2379
+    listen-client-urls: http://127.0.0.1:2379,http://172.17.0.1:2379
+    listen-peer-urls: http://127.0.0.1:2380
   update:
     reboot-strategy: off
   units:
+    - name: locksmithd.service
+      command: stop
     - name: docker.service
+      command: start
+    - name: etcd2.service
       command: start
     - name: systemd-networkd-wait-online.service
       enable: true
@@ -38,9 +49,14 @@ coreos:
         ExecStartPre=-/usr/bin/docker rm nginx-rtmp
 
         # Pull image first if needed
-        ExecStartPre=/usr/bin/docker pull awakening/awakening-nginx-rtmp
+        ExecStartPre=/usr/bin/docker pull awakening/awakening-nginx-rtmp:experimental
+
+        # Setup initial configuration
+        ExecStartPre=/usr/bin/etcdctl set /live/secret ${publish_secret}
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/low 128:64:160000
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/med 512:128:640000
 
         # Run bound to our IPv4 address, set DNS to Google Public DNS
-        ExecStart=/usr/bin/docker run --name nginx-rtmp -e PUBLISH_SECRET=${publish_secret} -e CORS_HTTP_ORIGIN=${cors_http_origin} -p 80:80 -p 1935:1935 --dns 8.8.8.8 --dns 8.8.4.4 awakening/awakening-nginx-rtmp
+        ExecStart=/usr/bin/docker run --name nginx-rtmp --add-host="etcd:172.17.0.1" -e ETCD_URL=http://etcd:2379 -p 80:80 -p 1935:1935 --dns 8.8.8.8 --dns 8.8.4.4 awakening/awakening-nginx-rtmp:experimental
 
         ExecStop=/usr/bin/docker stop nginx-rtmp
