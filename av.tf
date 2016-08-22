@@ -34,7 +34,7 @@ resource "cloudflare_record" "av1" {
     name = "av1"
     value = "${digitalocean_droplet.av1.ipv4_address}"
     type = "A"
-    ttl = 3600
+    ttl = 120
     proxied = false
 }
 
@@ -43,6 +43,6 @@ resource "cloudflare_record" "live" {
     name = "live"
     value = "${digitalocean_droplet.av1.ipv4_address}"
     type = "A"
-    ttl = 3600
+    ttl = 120
     proxied = false
 }
