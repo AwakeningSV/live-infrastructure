@@ -34,14 +34,12 @@ Check the plan:
 
 Apply to launch the infrastructure:
 
-    terraform apply -parallelism=1
-
-Note: `-parallelism=1` is required because of a [CloudFlare provider bug][eof].
+    terraform apply
 
 We use these resources for a few hours. Once the broadcast is complete,
 we simply destroy the resources:
 
-    terraform destroy -force -parallelism=1
+    terraform destroy -force
 
 ## License
 
@@ -53,6 +51,5 @@ MIT
 [tfvars]: https://www.terraform.io/intro/getting-started/variables.html
 [awakening-nginx-rtmp]: https://github.com/awakening-church/awakening-nginx-rtmp
 [usage]: https://github.com/awakening-church/awakening-nginx-rtmp/blob/master/README.md#usage
-[eof]: https://github.com/hashicorp/terraform/issues/8011
 [azure-setup]: https://www.terraform.io/docs/providers/azurerm/index.html#creating-credentials
 [azure-credit]: https://www.microsoft.com/en-us/philanthropies/product-donations/products/azure
