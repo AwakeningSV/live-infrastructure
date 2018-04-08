@@ -2,3 +2,4 @@
 terraform.tfvars
 *.backup
 *.tfstate
+.terraform
