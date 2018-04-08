@@ -125,7 +125,7 @@ resource "cloudflare_record" "av0" {
 
 resource "cloudflare_record" "live" {
     domain = "${var.cf_domain}"
-    name = "live"
+    name = "live-backend"
     value = "${azurerm_public_ip.av_public.ip_address}"
     type = "A"
     ttl = 120
