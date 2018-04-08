@@ -61,7 +61,8 @@ resource "azurerm_storage_account" "av_storage" {
     name = "${var.azure_storage_prefix}av"
     location = "${var.azure_region}"
     resource_group_name = "${azurerm_resource_group.live.name}"
-    account_type = "Standard_LRS"
+    account_tier = "Standard"
+    account_replication_type = "LRS"
 }
 
 resource "azurerm_storage_container" "av_storage_container" {
