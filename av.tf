@@ -16,7 +16,7 @@ data "template_file" "av_cloud_config" {
 }
 
 resource "digitalocean_ssh_key" "av" {
-    name = "AV SSH Key"
+    name = "Alt AV SSH Key"
     public_key = "${file("${var.ssh_key_file}")}"
 }
 
@@ -35,7 +35,7 @@ resource "cloudflare_record" "av1" {
     name = "av1"
     value = "${digitalocean_droplet.av1.ipv4_address}"
     type = "A"
-    ttl = 3600
+    ttl = 120
     proxied = false
 }
 
@@ -44,6 +44,6 @@ resource "cloudflare_record" "live" {
     name = "live"
     value = "${digitalocean_droplet.av1.ipv4_address}"
     type = "A"
-    ttl = 3600
+    ttl = 120
     proxied = false
 }
