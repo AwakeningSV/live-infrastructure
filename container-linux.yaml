@@ -1,0 +1,62 @@
+---
+systemd:
+  units:
+    - name: etcd-member.service
+      enabled: true
+      dropins:
+      - name: conf1.conf
+        contents: |
+          [Service]
+          Environment="ETCD_NAME=av1"
+          Environment="ETCD_ADVERTISE_CLIENT_URLS=http://127.0.0.1:2379"
+          Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=http://127.0.0.1:2380"
+          Environment="ETCD_LISTEN_CLIENT_URLS=http://127.0.0.1:2379,http://172.17.0.1:2379"
+          Environment="ETCD_LISTEN_PEER_URLS=http://127.0.0.1:2380"
+          Environment="ETCD_INITIAL_CLUSTER=av1=http://127.0.0.1:2380"
+    - name: locksmithd.service
+      mask: true
+    - name: update-engine.service
+      mask: true
+    - name: docker.service
+      enabled: true
+    - name: systemd-networkd-wait-online.service
+      enabled: true
+    - name: nginx-rtmp.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NGINX RTMP Server
+        Wants=docker.service
+        After=docker.service
+
+        # Wait for network to become ready
+        Wants=systemd-networkd-wait-online.service
+        After=systemd-networkd-wait-online.service
+
+        [Service]
+        # Set COREOS_PUBLIC_IPV4
+        EnvironmentFile=/etc/environment
+
+        # Allow time for Docker to download image
+        TimeoutStartSec=0
+
+        # Restart on failure
+        RestartSec=10
+        Restart=on-failure
+
+        # Remove old containers if required
+        ExecStartPre=-/usr/bin/docker kill nginx-rtmp
+        ExecStartPre=-/usr/bin/docker rm nginx-rtmp
+
+        # Pull image first if needed
+        ExecStartPre=/usr/bin/docker pull awakening/awakening-nginx-rtmp:experimental
+
+        # Setup initial configuration
+        ExecStartPre=/usr/bin/etcdctl set /live/secret ${publish_secret}
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/low 128:64:160000
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/med 512:128:640000
+
+        # Run bound to our IPv4 address, set DNS to Google Public DNS
+        ExecStart=/usr/bin/docker run --name nginx-rtmp --add-host="etcd:172.17.0.1" -e ETCD_URL=http://etcd:2379 -p 80:80 -p 1935:1935 --dns 8.8.8.8 --dns 8.8.4.4 awakening/awakening-nginx-rtmp:experimental
+
+        ExecStop=/usr/bin/docker stop nginx-rtmp
