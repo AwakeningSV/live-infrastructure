@@ -41,6 +41,17 @@ we simply destroy the resources:
 
     terraform destroy -force
 
+## Modifying Container Linux configuration
+
+To modify the Container Linux configuration file, container-linux.yaml,
+install the Container Linux conifiguration transpiler. On macOS:
+
+    brew install coreos-ct
+
+Then transpile `container-linux.yaml` into `ignition.yaml` with the command:
+
+    make
+
 ## License
 
 MIT
