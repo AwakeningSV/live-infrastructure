@@ -8,7 +8,7 @@ provider "cloudflare" {
 }
 
 data "template_file" "av_cloud_config" {
-    template = "${file("cloud-config.yaml")}"
+    template = "${file("ignition.json")}"
     vars {
         publish_secret = "${var.publish_secret}"
         cors_http_origin = "${var.cors_http_origin}"
