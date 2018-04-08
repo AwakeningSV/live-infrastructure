@@ -40,7 +40,7 @@ resource "cloudflare_record" "av1" {
 
 resource "cloudflare_record" "live" {
     domain = "${var.cf_domain}"
-    name = "live"
+    name = "live-backend"
     value = "${digitalocean_droplet.av1.ipv4_address}"
     type = "A"
     ttl = 120
