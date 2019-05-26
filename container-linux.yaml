@@ -49,14 +49,17 @@ systemd:
         ExecStartPre=-/usr/bin/docker rm nginx-rtmp
 
         # Pull image first if needed
-        ExecStartPre=/usr/bin/docker pull awakening/awakening-nginx-rtmp:experimental
+        ExecStartPre=/usr/bin/docker pull awakening/awakening-nginx-rtmp:2019-04-28
 
         # Setup initial configuration
         ExecStartPre=/usr/bin/etcdctl set /live/secret ${publish_secret}
-        ExecStartPre=/usr/bin/etcdctl set /live/encodings/low 128:64:160000
-        ExecStartPre=/usr/bin/etcdctl set /live/encodings/med 512:128:640000
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/1 145:48:416x234
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/2 365:48:640x360
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/3 730:128:768x432
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/4 1100:128:768x432
+        ExecStartPre=/usr/bin/etcdctl set /live/encodings/5 2000:128:1080x720
 
         # Run bound to our IPv4 address, set DNS to Google Public DNS
-        ExecStart=/usr/bin/docker run --name nginx-rtmp --add-host="etcd:172.17.0.1" -e ETCD_URL=http://etcd:2379 -p 80:80 -p 1935:1935 --dns 8.8.8.8 --dns 8.8.4.4 awakening/awakening-nginx-rtmp:experimental
+        ExecStart=/usr/bin/docker run --name nginx-rtmp --add-host="etcd:172.17.0.1" -e ETCD_URL=http://etcd:2379 -p 80:80 -p 1935:1935 --dns 8.8.8.8 --dns 8.8.4.4 awakening/awakening-nginx-rtmp:2019-04-28
 
         ExecStop=/usr/bin/docker stop nginx-rtmp
