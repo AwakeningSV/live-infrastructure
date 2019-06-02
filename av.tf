@@ -1,11 +1,13 @@
 provider "azurerm" {
     subscription_id = "${var.azure_subscription_id}"
     tenant_id = "${var.azure_tenant_id}"
+    version = "~> 1.20.0"
 }
 
 provider "cloudflare" {
     email = "${var.cf_email}"
     token = "${var.cf_token}"
+    version = "~> 1.9.0"
 }
 
 data "template_file" "av_cloud_config" {
